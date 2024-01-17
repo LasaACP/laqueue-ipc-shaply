@@ -28,7 +28,7 @@ class PQueue
 	public:
 	PQueue()
 	{
-		front = NULL;
+
 	}
 		
 	void push(void *item, int priority);
