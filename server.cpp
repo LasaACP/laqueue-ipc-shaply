@@ -107,11 +107,16 @@ void *server_main (void *threadarg)
 			for(int i=0; ((i < outLen) && (i < 64)); i++){
 				out_buffer[i] = toupper(out_buffer[i]);
 			}
-		
+	
 			if (lq_send (qd_client, out_buffer, strlen (out_buffer), 0) == -1) {
 				perror ("Server: Not able to send message to client");
 				continue;
 			}
+      lq_getattr(qd_client, &attr);
+      if (attr.lq_curmsgs >= attr.lq_maxmsg) {
+        perror ("Server: Not able to send message to client");
+        continue;
+      }
 			
 		}
 		

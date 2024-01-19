@@ -170,13 +170,10 @@ int lq_getattr (lqd_t __msgid, struct lq_attr *__mqstat)
     errno = EBADF;
     return -1;
   }
-  if (__mqstat->lq_flags != O_NONBLOCK) {
+  if (__mqstat->lq_flags != O_NONBLOCK || __mqstat->lq_flags != 0) {
     errno = EINVAL;
     return -1;
   }
-  __mqstat->lq_flags = O_NONBLOCK;
-  __mqstat->lq_maxmsg = 10;
-  __mqstat->lq_msgsize = 256;
   PQueue * temp = lqueue_table[__msgid].lq_ptr;
   __mqstat->lq_curmsgs = temp->size();
   
