@@ -35,6 +35,6 @@ class PQueue
 	void* top();
 	void pop();
 	void display();
-
+  int size();
 
 };

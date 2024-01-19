@@ -93,4 +93,16 @@ void PQueue::display()
     temp = temp->link;
   }
 }
-	
+
+/*
+* Return Priority Queue Size
+*/
+int PQueue::size() {
+  node * temp = front;
+  int s = 0;
+  while (temp != NULL) {
+    s++;
+    temp = temp->link;
+  }
+  return s;
+}

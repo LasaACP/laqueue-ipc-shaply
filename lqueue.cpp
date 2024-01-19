@@ -166,13 +166,28 @@ int lq_unlink (const char *__name)
 }
 int lq_getattr (lqd_t __msgid, struct lq_attr *__mqstat)
 {
-	for (int i=0;i<LQUEUE_TABLE_MAX; i++)
-		if (lqueue_table[i].lq_ptr != NULL)
-			std::cout << i << ". " << lqueue_table[i].lq_name << std::endl;
+  if (__msgid >= LQUEUE_TABLE_MAX) {
+    errno = EBADF;
+    return -1;
+  }
+  if (__mqstat->lq_flags != O_NONBLOCK) {
+    errno = EINVAL;
+    return -1;
+  }
+  __mqstat->lq_flags = O_NONBLOCK;
+  __mqstat->lq_maxmsg = 10;
+  __mqstat->lq_msgsize = 256;
+  PQueue * temp = lqueue_table[__msgid].lq_ptr;
+  __mqstat->lq_curmsgs = temp->size();
+  
+	// for (int i=0;i<LQUEUE_TABLE_MAX; i++)
+	// 	if (lqueue_table[i].lq_ptr != NULL)
+	// 		std::cout << i << ". " << lqueue_table[i].lq_name << std::endl;
 	return 0;
 }
 int lq_setattr (lqd_t __msgid, const struct lq_attr *__mqstat, struct lq_attr *__omqattr)
 {
+  
 	return 0;
 }
 
