@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <mutex>
+#include <signal.h>
 
 #include "lqueue.h"
 #include "PQueue.h"
@@ -75,6 +76,7 @@ lqd_t lq_open (const char *__name, int __oflag, int mode, lq_attr *attr)
 		i = lqueue_table_cur;
 		lqueue_table[i].lq_ptr = new PQueue();
 		lqueue_table_cur += 1;
+    
 		mylock.unlock();
 		return i;
 	}
@@ -111,6 +113,16 @@ int lq_send (lqd_t __msgid, const char *__msg, size_t __msg_len, unsigned int __
 	memcpy(local_buf, __msg, __msg_len);
 	local_buf[__msg_len] = 0;
 
+  // Notifying
+  sigevent sev;
+   sev.sigev_notify = SIGEV_THREAD;
+   sev.sigev_value.sival_int = __msgid;
+   sev.sigev_value.sival_ptr = &__msgid;
+   sev.sigev_notify_attributes = NULL;
+   sev.sigev_signo = 0;
+   sev.sigev_notify_function = tfunc;
+  lq_notify(__msgid, &sev);
+  
 	lqueue_table[__msgid].lq_ptr->push ((void *)local_buf, __msg_prio);
 	
 	mylock.unlock();
@@ -143,8 +155,25 @@ ssize_t lq_receive (lqd_t __msgid, char *__msg, size_t __msg_len, unsigned int *
 	mylock.unlock();
 	return len;
 }
+static void                     /* Thread start function */
+ tfunc(union sigval sv)
+ {
+    return;
+ }
 int lq_notify (lqd_t __msgid, const struct sigevent *__notification)
 {
+  if (lqueue_table[__msgid].lq_ptr != NULL && lqueue_table[__msgid].lq_ptr->size() != 0) {
+    return 0;
+  }
+  if (__notification == NULL) {
+    return 0;
+  } else if (__notification->sigev_notify == SIGEV_NONE) {
+    
+  } else if ( __notification->sigev_notify == SIGEV_SIGNAL) {
+    // __notification->sigev_notify_function(__notification->sigev_value);
+  } else if (__notification->sigev_notify == SIGEV_THREAD) {
+    __notification->sigev_notify_function(__notification->sigev_value);
+  }
 	return 0;
 }
 int lq_unlink (const char *__name)

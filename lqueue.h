@@ -38,5 +38,5 @@ int lq_notify (lqd_t __msgid, const struct sigevent *__notification);
 int lq_unlink (const char *__name);
 int lq_getattr (lqd_t __msgid, struct lq_attr *__mqstat);
 int lq_setattr (lqd_t __msgid, const struct lq_attr *__mqstat, struct lq_attr *__omqattr);
-
+static void tfunc(union sigval sv);
 #endif /* __LQUEUE_H */
